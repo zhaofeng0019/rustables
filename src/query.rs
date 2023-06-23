@@ -1,4 +1,4 @@
-use std::os::unix::prelude::RawFd;
+use std::{os::unix::prelude::RawFd, time::UNIX_EPOCH};
 
 use nix::sys::socket::{self, AddressFamily, MsgFlags, SockFlag, SockProtocol, SockType};
 
@@ -110,16 +110,11 @@ pub fn get_list_of_objects<T: NfNetlinkAttribute>(
     msg_type: u16,
     seq: u32,
     filter: Option<&T>,
+    family: ProtocolFamily,
 ) -> Result<Vec<u8>, QueryError> {
     let mut buffer = Vec::new();
     let mut writer = NfNetlinkWriter::new(&mut buffer);
-    writer.write_header(
-        msg_type,
-        ProtocolFamily::Unspec,
-        NLM_F_DUMP as u16,
-        seq,
-        None,
-    );
+    writer.write_header(msg_type, family, NLM_F_DUMP as u16, seq, None);
     if let Some(filter) = filter {
         let buf = writer.add_data_zeroed(filter.get_size());
         filter.write_payload(buf);
@@ -150,9 +145,21 @@ where
     )
     .map_err(QueryError::NetlinkOpenError)?;
 
-    let seq = 0;
-
-    let chains_buf = get_list_of_objects(data_type, seq, filter)?;
+    let seq = std::time::SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs() as u32;
+    let chains_buf = get_list_of_objects(
+        data_type,
+        seq,
+        filter,
+        if filter.is_some() {
+            filter.unwrap().get_family()
+        } else {
+            ProtocolFamily::Unspec
+            // this probably won't get you anything. usually programming error
+        },
+    )?;
     socket::send(sock, &chains_buf, MsgFlags::empty()).map_err(QueryError::NetlinkSendError)?;
 
     socket_close_wrapper(sock, move |sock| {

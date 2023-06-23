@@ -75,6 +75,15 @@ impl Rule {
         batch.add(&self, crate::MsgType::Add);
         self
     }
+
+    pub fn essentialize(&mut self) {
+        // the essence
+        // they remain unchanged during runtime
+        self.handle = None;
+        self.position = None;
+        self.id = None;
+        // XXX do we need userdata cleaned as well ?
+    }
 }
 
 impl NfNetlinkObject for Rule {
