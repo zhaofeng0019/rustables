@@ -24,6 +24,7 @@ pub struct Batch {
     // the rest of the crate (let alone publicly).
     writer: NfNetlinkWriter<'static>,
     seq: u32,
+    non_empty: bool,
 }
 
 impl Batch {
@@ -50,6 +51,7 @@ impl Batch {
             buf,
             writer,
             seq: seq + 1,
+            non_empty: false,
         }
     }
 
@@ -57,6 +59,7 @@ impl Batch {
     pub fn add<T: NfNetlinkObject>(&mut self, msg: &T, msg_type: MsgType) {
         trace!("Writing NlMsg with seq {} to batch", self.seq);
         msg.add_or_remove(&mut self.writer, msg_type, self.seq);
+        self.non_empty = true;
         self.seq += 1;
     }
 
@@ -90,6 +93,12 @@ impl Batch {
     }
 
     pub fn send(self) -> Result<(), QueryError> {
+        if !self.non_empty {
+            // if empty, the socket will receive nothing and block forever
+            // observed on my machine
+            return Ok(());
+        }
+
         use crate::query::{recv_and_process, socket_close_wrapper};
 
         let sock = socket::socket(
@@ -108,6 +117,7 @@ impl Batch {
         socket::bind(sock, &addr).expect("bind");
 
         let to_send = self.finalize();
+        log::trace!("to send {}", to_send.len());
         let mut sent = 0;
         while sent != to_send.len() {
             sent += socket::send(sock, &to_send[sent..], MsgFlags::empty())

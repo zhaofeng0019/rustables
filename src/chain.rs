@@ -194,18 +194,10 @@ pub fn list_chains_for_table(table: &Table) -> Result<Vec<Chain>, QueryError> {
     crate::query::list_objects_with_data(
         libc::NFT_MSG_GETCHAIN as u16,
         &|chain: Chain, (table, chains): &mut (&Table, &mut Vec<Chain>)| {
-            if chain.get_table() == table.get_name() && chain.get_family() == table.get_family() {
-                chains.push(chain);
-            } else {
-                info!(
-                    "Ignoring chain {:?} because it doesn't map the table {:?}",
-                    chain.get_name(),
-                    table.get_name()
-                );
-            }
+            chains.push(chain);
             Ok(())
         },
-        None,
+        Some(&Chain::new(table)),
         &mut (&table, &mut result),
     )?;
     Ok(result)

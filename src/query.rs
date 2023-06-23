@@ -22,9 +22,10 @@ pub(crate) fn recv_and_process<'a, T>(
     let mut msg_buffer = vec![0; 2 * nft_nlmsg_maxsize() as usize];
     let mut buf_start = 0;
     let mut end_pos = 0;
-
+    debug!("recv_and_process");
     loop {
-        let nb_recv = socket::recv(sock, &mut msg_buffer[end_pos..], MsgFlags::empty())
+        debug!("recv_and_process nb_recv");
+        let nb_recv = socket::recv(sock, &mut msg_buffer[buf_start..], MsgFlags::empty())
             .map_err(QueryError::NetlinkRecvError)?;
         if nb_recv <= 0 {
             return Ok(());
@@ -43,6 +44,7 @@ pub(crate) fn recv_and_process<'a, T>(
 
             match msg {
                 NlMsg::Done => {
+                    debug!("NlMsg::Done");
                     return Ok(());
                 }
                 NlMsg::Error(e) => {
@@ -145,10 +147,12 @@ where
     )
     .map_err(QueryError::NetlinkOpenError)?;
 
-    let seq = std::time::SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_secs() as u32;
+    // let seq = std::time::SystemTime::now()
+    //     .duration_since(UNIX_EPOCH)
+    //     .unwrap()
+    //     .as_secs() as u32;
+
+    let seq = 0;
     let chains_buf = get_list_of_objects(
         data_type,
         seq,
