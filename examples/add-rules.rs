@@ -57,7 +57,7 @@ fn main() -> Result<(), Error> {
     // Create a batch. This is used to store all the netlink messages we will later send.
     // Creating a new batch also automatically writes the initial batch begin message needed
     // to tell netlink this is a single transaction that might arrive over multiple netlink packets.
-    let mut batch = Batch::new();
+    let mut batch: Batch = Batch::new();
 
     // Create a netfilter table operating on both IPv4 and IPv6 (ProtoFamily::Inet)
     let table = Table::new(ProtocolFamily::Inet).with_name(TABLE_NAME);

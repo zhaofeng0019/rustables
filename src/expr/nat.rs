@@ -17,7 +17,7 @@ pub enum NatType {
 
 /// A source or destination NAT statement. Modifies the source or destination address (and possibly
 /// port) of packets.
-#[derive(Default, Debug, Clone, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
 #[nfnetlink_struct(nested = true)]
 pub struct Nat {
     #[field(sys::NFTA_NAT_TYPE)]

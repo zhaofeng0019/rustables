@@ -6,7 +6,7 @@ use crate::{
     sys::{NFTA_IMMEDIATE_DATA, NFTA_IMMEDIATE_DREG},
 };
 
-#[derive(Clone, PartialEq, Eq, Default, Debug)]
+#[derive(Clone, PartialEq, Eq, Default, Debug, Hash)]
 #[nfnetlink_struct]
 pub struct Immediate {
     #[field(NFTA_IMMEDIATE_DREG)]

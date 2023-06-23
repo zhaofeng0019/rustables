@@ -58,7 +58,7 @@ pub trait Expression {
     fn get_name() -> &'static str;
 }
 
-#[derive(Clone, PartialEq, Eq, Default, Debug)]
+#[derive(Clone, PartialEq, Eq, Default, Debug, Hash)]
 #[nfnetlink_struct(nested = true, derive_decoder = false)]
 pub struct RawExpression {
     #[field(NFTA_EXPR_NAME)]
@@ -81,7 +81,7 @@ where
 
 macro_rules! create_expr_variant {
     ($enum:ident $(, [$name:ident, $type:ty])+) => {
-        #[derive(Debug, Clone, PartialEq, Eq)]
+        #[derive(Debug, Clone, PartialEq, Eq, Hash)]
         pub enum $enum {
             $(
                 $name($type),
@@ -186,7 +186,7 @@ create_expr_variant!(
 pub type ExpressionList = NfNetlinkList<RawExpression>;
 
 // default type for expressions that we do not handle yet
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ExpressionRaw(Vec<u8>);
 
 impl NfNetlinkAttribute for ExpressionRaw {

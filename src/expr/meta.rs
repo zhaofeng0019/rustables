@@ -4,7 +4,7 @@ use super::{Expression, Register};
 use crate::sys;
 
 /// A meta expression refers to meta data associated with a packet.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[nfnetlink_enum(u32)]
 #[non_exhaustive]
 pub enum MetaType {
@@ -38,7 +38,7 @@ pub enum MetaType {
     PRandom = sys::NFT_META_PRANDOM,
 }
 
-#[derive(Clone, PartialEq, Eq, Default, Debug)]
+#[derive(Clone, PartialEq, Eq, Default, Debug, Hash)]
 #[nfnetlink_struct]
 pub struct Meta {
     #[field(sys::NFTA_META_DREG)]

@@ -11,7 +11,7 @@ use crate::{
 use super::{Expression, Register};
 
 /// Comparison operator.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[nfnetlink_enum(u32, nested = true)]
 pub enum CmpOp {
     /// Equals.
@@ -29,7 +29,7 @@ pub enum CmpOp {
 }
 
 /// Comparator expression. Allows comparing the content of the netfilter register with any value.
-#[derive(Default, Debug, Clone, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
 #[nfnetlink_struct]
 pub struct Cmp {
     #[field(NFTA_CMP_SREG)]

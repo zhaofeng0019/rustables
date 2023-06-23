@@ -7,7 +7,7 @@ use crate::sys::{
     NFTA_BITWISE_DREG, NFTA_BITWISE_LEN, NFTA_BITWISE_MASK, NFTA_BITWISE_SREG, NFTA_BITWISE_XOR,
 };
 
-#[derive(Clone, PartialEq, Eq, Default, Debug)]
+#[derive(Clone, PartialEq, Eq, Default, Debug, Hash)]
 #[nfnetlink_struct]
 pub struct Bitwise {
     #[field(NFTA_BITWISE_SREG)]

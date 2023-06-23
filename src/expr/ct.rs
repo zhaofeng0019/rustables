@@ -16,14 +16,14 @@ bitflags::bitflags! {
     }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[nfnetlink_enum(u32, nested = true)]
 pub enum ConntrackKey {
     State = NFT_CT_STATE,
     Mark = NFT_CT_MARK,
 }
 
-#[derive(Default, Clone, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Debug, PartialEq, Eq, Hash)]
 #[nfnetlink_struct(nested = true)]
 pub struct Conntrack {
     #[field(NFTA_CT_DREG)]

@@ -5,7 +5,7 @@ use crate::error::BuilderError;
 use crate::sys::{NFTA_LOOKUP_DREG, NFTA_LOOKUP_SET, NFTA_LOOKUP_SET_ID, NFTA_LOOKUP_SREG};
 use crate::Set;
 
-#[derive(Clone, PartialEq, Eq, Default, Debug)]
+#[derive(Clone, PartialEq, Eq, Default, Debug, Hash)]
 #[nfnetlink_struct]
 pub struct Lookup {
     #[field(NFTA_LOOKUP_SET)]

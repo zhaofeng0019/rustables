@@ -7,7 +7,7 @@ use crate::{
 };
 
 /// Payload expressions refer to data from the packet's payload.
-#[derive(Default, Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Default, Debug, Copy, Clone, PartialEq, Eq, Hash)]
 #[nfnetlink_struct(nested = true)]
 pub struct Payload {
     #[field(sys::NFTA_PAYLOAD_DREG)]
@@ -132,7 +132,7 @@ impl LLHeaderField {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum NetworkHeaderField {
     IPv4(IPv4HeaderField),
     IPv6(IPv6HeaderField),
@@ -156,7 +156,7 @@ impl HeaderField for NetworkHeaderField {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[non_exhaustive]
 pub enum IPv4HeaderField {
     Ttl,
@@ -199,7 +199,7 @@ impl IPv4HeaderField {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[non_exhaustive]
 pub enum IPv6HeaderField {
     NextHeader,

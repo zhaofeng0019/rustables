@@ -10,7 +10,7 @@ impl Expression for Reject {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Default, Debug)]
+#[derive(Clone, PartialEq, Eq, Default, Debug, Hash)]
 #[nfnetlink_struct]
 /// A reject expression that defines the type of rejection message sent when discarding a packet.
 pub struct Reject {

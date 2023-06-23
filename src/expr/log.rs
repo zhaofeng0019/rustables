@@ -6,7 +6,7 @@ use crate::{
     sys::{NFTA_LOG_GROUP, NFTA_LOG_PREFIX},
 };
 
-#[derive(Clone, PartialEq, Eq, Default, Debug)]
+#[derive(Clone, PartialEq, Eq, Default, Debug, Hash)]
 #[nfnetlink_struct]
 /// A Log expression will log all packets that match the rule.
 pub struct Log {

@@ -5,7 +5,7 @@ use crate::sys;
 
 /// A counter expression adds a counter to the rule that is incremented to count number of packets
 /// and number of bytes for all packets that have matched the rule.
-#[derive(Default, Clone, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Debug, PartialEq, Eq, Hash)]
 #[nfnetlink_struct]
 pub struct Counter {
     #[field(sys::NFTA_COUNTER_BYTES)]

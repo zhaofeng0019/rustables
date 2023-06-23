@@ -21,7 +21,7 @@ pub enum VerdictType {
 }
 
 #[nfnetlink_struct(nested = true)]
-#[derive(Clone, PartialEq, Eq, Default, Debug)]
+#[derive(Clone, PartialEq, Eq, Default, Debug, Hash)]
 pub struct Verdict {
     #[field(NFTA_VERDICT_CODE)]
     code: VerdictType,

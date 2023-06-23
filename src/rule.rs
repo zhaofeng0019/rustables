@@ -15,7 +15,7 @@ use crate::sys::{
 use crate::{Batch, ProtocolFamily};
 
 /// A nftables firewall rule.
-#[derive(Clone, PartialEq, Eq, Default, Debug)]
+#[derive(Clone, PartialEq, Eq, Default, Debug, Hash)]
 #[nfnetlink_struct(derive_deserialize = false)]
 pub struct Rule {
     family: ProtocolFamily,

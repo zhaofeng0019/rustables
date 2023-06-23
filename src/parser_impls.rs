@@ -123,7 +123,7 @@ impl NfNetlinkDeserializable for Vec<u8> {
         Ok((buf.to_vec(), &[]))
     }
 }
-#[derive(Clone, PartialEq, Eq, Default, Debug)]
+#[derive(Clone, PartialEq, Eq, Default, Debug, Hash)]
 #[nfnetlink_struct(nested = true)]
 pub struct NfNetlinkData {
     #[field(NFTA_DATA_VALUE)]
@@ -132,7 +132,7 @@ pub struct NfNetlinkData {
     verdict: Verdict,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Default, Hash)]
 pub struct NfNetlinkList<T>
 where
     T: NfNetlinkDeserializable + NfNetlinkAttribute + Debug + Clone + Eq + Default,
