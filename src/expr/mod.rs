@@ -212,3 +212,9 @@ impl Expression for ExpressionRaw {
         "unknown_expression"
     }
 }
+
+impl From<Vec<u8>> for ExpressionRaw {
+    fn from(value: Vec<u8>) -> Self {
+        Self(value)
+    }
+}

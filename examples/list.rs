@@ -7,7 +7,7 @@ use rustables::{
         VerdictKind,
     },
     iface_index, list_chains_for_table, list_rules_for_chain, list_tables, Batch, Chain,
-    ChainPolicy, Hook, HookClass, MsgType, ProtocolFamily, Rule, Table,
+    ChainPolicy, Hook, HookClass, MsgType, ProtocolFamily, Rule, Table, util::Essence,
 };
 use std::{collections::HashSet, net::Ipv4Addr};
 

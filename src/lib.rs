@@ -67,7 +67,7 @@ pub mod error;
 
 pub mod query;
 
-pub(crate) mod nlmsg;
+pub mod nlmsg;
 pub(crate) mod parser;
 pub(crate) mod parser_impls;
 
@@ -84,6 +84,8 @@ pub mod set;
 pub use set::Set;
 
 pub mod sys;
+
+pub mod util;
 
 #[cfg(test)]
 mod tests;

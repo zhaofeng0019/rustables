@@ -13,6 +13,7 @@ use crate::sys::{
     NLM_F_CREATE,
 };
 use crate::{Batch, ProtocolFamily};
+use crate::util;
 
 /// A nftables firewall rule.
 #[derive(Clone, PartialEq, Eq, Default, Debug, Hash)]
@@ -76,13 +77,14 @@ impl Rule {
         self
     }
 
-    pub fn essentialize(&mut self) {
-        // the essence
-        // they remain unchanged during runtime
+
+}
+
+impl util::Essence for Rule {
+    fn essentialize(&mut self) {
         self.handle = None;
         self.position = None;
         self.id = None;
-        // XXX do we need userdata cleaned as well ?
     }
 }
 

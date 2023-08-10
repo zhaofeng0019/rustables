@@ -8,6 +8,7 @@ use crate::sys::{
     NFTA_TABLE_FLAGS, NFTA_TABLE_NAME, NFT_MSG_DELTABLE, NFT_MSG_GETTABLE,
     NFT_MSG_NEWTABLE,
 };
+use crate::util::Essence;
 use crate::{Batch, ProtocolFamily};
 
 /// Abstraction of a `nftnl_table`, the top level container in netfilter. A table has a protocol
@@ -15,7 +16,7 @@ use crate::{Batch, ProtocolFamily};
 ///
 /// [`Chain`]: struct.Chain.html
 #[nfnetlink_struct(derive_deserialize = false)]
-#[derive(Default, PartialEq, Eq, Debug)]
+#[derive(Default, PartialEq, Eq, Debug, Hash)]
 pub struct Table {
     family: ProtocolFamily,
     #[field(NFTA_TABLE_NAME)]
@@ -25,6 +26,8 @@ pub struct Table {
     #[field(optional = true, crate::sys::NFTA_TABLE_USERDATA)]
     userdata: Vec<u8>,
 }
+
+impl Essence for Table {}
 
 impl Table {
     pub fn new(family: ProtocolFamily) -> Table {

@@ -7,6 +7,7 @@ use crate::sys::{
     NFTA_CHAIN_FLAGS, NFTA_CHAIN_HOOK, NFTA_CHAIN_NAME, NFTA_CHAIN_POLICY, NFTA_CHAIN_TABLE,
     NFTA_CHAIN_TYPE, NFTA_HOOK_HOOKNUM, NFTA_HOOK_PRIORITY, NFT_MSG_DELCHAIN, NFT_MSG_NEWCHAIN,
 };
+use crate::util::Essence;
 use crate::{Batch, ProtocolFamily, Table};
 use std::fmt::Debug;
 
@@ -28,7 +29,7 @@ pub enum HookClass {
     PostRouting = libc::NF_INET_POST_ROUTING,
 }
 
-#[derive(Clone, PartialEq, Eq, Default, Debug)]
+#[derive(Clone, PartialEq, Eq, Default, Debug, Hash)]
 #[nfnetlink_struct(nested = true)]
 pub struct Hook {
     /// Define the action netfilter will apply to packets processed by this chain, but that did not match any rules in it.
@@ -135,7 +136,7 @@ impl NfNetlinkDeserializable for ChainType {
 /// [`Table`]: struct.Table.html
 /// [`Rule`]: struct.Rule.html
 #[nfnetlink_struct(derive_deserialize = false)]
-#[derive(PartialEq, Eq, Default, Debug)]
+#[derive(PartialEq, Eq, Default, Debug, Hash)]
 pub struct Chain {
     family: ProtocolFamily,
     #[field(NFTA_CHAIN_TABLE)]
@@ -153,6 +154,8 @@ pub struct Chain {
     #[field(optional = true, crate::sys::NFTA_CHAIN_USERDATA)]
     userdata: Vec<u8>,
 }
+
+impl Essence for Chain {}
 
 impl Chain {
     /// Creates a new chain instance inside the given [`Table`].
