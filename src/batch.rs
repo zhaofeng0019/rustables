@@ -2,8 +2,13 @@ use libc;
 
 use thiserror::Error;
 
+
+
+use netlink_sys::{AsyncSocket, AsyncSocketExt};
+
 use crate::error::QueryError;
 use crate::nlmsg::{NfNetlinkObject, NfNetlinkWriter};
+use crate::query::{recv_and_process_async};
 use crate::sys::NFNL_SUBSYS_NFTABLES;
 use crate::{MsgType, ProtocolFamily};
 
@@ -24,7 +29,7 @@ pub struct Batch {
     // the rest of the crate (let alone publicly).
     writer: NfNetlinkWriter<'static>,
     seq: u32,
-    non_empty: bool,
+    pub(crate) non_empty: bool,
 }
 
 impl Batch {
@@ -103,7 +108,7 @@ impl Batch {
 
         let sock = socket::socket(
             AddressFamily::Netlink,
-            SockType::Raw,
+            SockType::Datagram,
             SockFlag::empty(),
             SockProtocol::NetlinkNetFilter,
         )
@@ -127,6 +132,18 @@ impl Batch {
         Ok(socket_close_wrapper(sock, move |sock| {
             recv_and_process(sock, Some(max_seq), None, &mut ())
         })?)
+    }
+
+    pub async fn send_async<S: AsyncSocket>(self, sock: &mut S) -> anyhow::Result<()> {
+        if !self.non_empty {
+            return Ok(());
+        }
+        let max_seq = self.seq - 1;
+        let to_send = self.finalize();
+        sock.send(&to_send).await?;
+        recv_and_process_async(sock, Some(max_seq), None, &mut ()).await?;
+
+        Ok(())
     }
 }
 

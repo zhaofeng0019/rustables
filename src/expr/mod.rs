@@ -121,7 +121,7 @@ macro_rules! create_expr_variant {
         impl $crate::nlmsg::AttributeDecoder for RawExpression {
             fn decode_attribute(
                 &mut self,
-                attr_type: u16,
+                attr_type: crate::nlmsg::NetlinkType,
                 buf: &[u8],
             ) -> Result<(), $crate::error::DecodeError> {
                 debug!("Decoding attribute {} in an expression", attr_type);

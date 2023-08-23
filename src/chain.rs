@@ -1,4 +1,5 @@
 use libc::{NF_ACCEPT, NF_DROP};
+use netlink_sys::AsyncSocket;
 use rustables_macros::nfnetlink_struct;
 
 use crate::error::{DecodeError, QueryError};
@@ -196,12 +197,30 @@ pub fn list_chains_for_table(table: &Table) -> Result<Vec<Chain>, QueryError> {
     let mut result = Vec::new();
     crate::query::list_objects_with_data(
         libc::NFT_MSG_GETCHAIN as u16,
-        &|chain: Chain, (table, chains): &mut (&Table, &mut Vec<Chain>)| {
+        &|chain: Chain, (_table, chains): &mut (&Table, &mut Vec<Chain>)| {
             chains.push(chain);
             Ok(())
         },
         Some(&Chain::new(table)),
         &mut (&table, &mut result),
     )?;
+    Ok(result)
+}
+
+pub async fn list_chains_for_table_async<S: AsyncSocket>(
+    table: &Table,
+    S: &mut S,
+) -> anyhow::Result<Vec<Chain>> {
+    let mut result = Vec::new();
+    crate::query::list_objects_with_data_async(
+        libc::NFT_MSG_GETCHAIN as u16,
+        &|chain: Chain, (_table, chains): &mut (&Table, &mut Vec<Chain>)| {
+            chains.push(chain);
+            Ok(())
+        },
+        Some(&Chain::new(table)),
+        &mut (&table, &mut result),
+        S
+    ).await?;
     Ok(result)
 }

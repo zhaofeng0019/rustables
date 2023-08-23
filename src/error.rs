@@ -3,7 +3,7 @@ use std::string::FromUtf8Error;
 use nix::errno::Errno;
 use thiserror::Error;
 
-use crate::sys::nlmsgerr;
+use crate::{sys::nlmsgerr, nlmsg::NetlinkType};
 
 #[derive(Error, Debug)]
 pub enum DecodeError {
@@ -101,7 +101,7 @@ pub enum DecodeError {
     MissingExpressionName,
 
     #[error("Unsupported attribute type")]
-    UnsupportedAttributeType(u16),
+    UnsupportedAttributeType(NetlinkType),
 
     #[error("Unexpected message type")]
     UnexpectedType(u16),

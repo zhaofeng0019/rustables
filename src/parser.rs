@@ -138,7 +138,7 @@ pub(crate) fn read_attributes<T: AttributeDecoder + Default>(buf: &[u8]) -> Resu
     while remaining_size > pad_netlink_object::<nlattr>() {
         let nlattr = unsafe { *transmute::<*const u8, *const nlattr>(buf[pos..].as_ptr()) };
         // ignore the byteorder and nested attributes
-        let nla_type = nlattr.nla_type & NLA_TYPE_MASK as u16;
+        let nla_type = (nlattr.nla_type & NLA_TYPE_MASK as u16) as NetlinkType;
 
         pos += pad_netlink_object::<nlattr>();
         let attr_remaining_size = nlattr.nla_len as usize - pad_netlink_object::<nlattr>();

@@ -1,15 +1,11 @@
-use ipnetwork::{IpNetwork, Ipv4Network};
+
 use rustables::{
-    data_type::ip_to_vec,
     expr::{
-        self, Bitwise, Cmp, CmpOp, Counter, HighLevelPayload, ICMPv6HeaderField, IPv4HeaderField,
-        IcmpCode, Immediate, Meta, MetaType, NetworkHeaderField, Register, TransportHeaderField,
+        self,
         VerdictKind,
-    },
-    iface_index, list_chains_for_table, list_rules_for_chain, list_tables, Batch, Chain,
-    ChainPolicy, Hook, HookClass, MsgType, ProtocolFamily, Rule, Table, util::Essence,
+    }, list_chains_for_table, list_rules_for_chain, Chain, ProtocolFamily, Rule, Table, util::Essence,
 };
-use std::{collections::HashSet, net::Ipv4Addr};
+
 
 fn main() {
     // let tables = list_tables().unwrap();

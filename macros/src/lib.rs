@@ -127,7 +127,7 @@ impl Default for StructArgs {
         Self {
             nested: false,
             derive_decoder: true,
-            derive_deserialize: true,
+            derive_deserialize: true
         }
     }
 }
@@ -249,7 +249,7 @@ pub fn nfnetlink_struct(attrs: TokenStream, item: TokenStream) -> TokenStream {
 
     let mut fields = Vec::with_capacity(ast.fields.len());
     let mut identical_fields = Vec::new();
-
+    
     'out: for field in ast.fields.iter() {
         for attr in field.attrs.iter() {
             if let Some(id) = attr.path.get_ident() {
@@ -364,7 +364,7 @@ pub fn nfnetlink_struct(attrs: TokenStream, item: TokenStream) -> TokenStream {
         quote!(
             impl crate::nlmsg::AttributeDecoder for #name {
                 #[allow(dead_code)]
-                fn decode_attribute(&mut self, attr_type: u16, buf: &[u8]) -> Result<(), crate::error::DecodeError> {
+                fn decode_attribute(&mut self, attr_type: crate::nlmsg::NetlinkType, buf: &[u8]) -> Result<(), crate::error::DecodeError> {
                     use crate::nlmsg::NfNetlinkDeserializable;
                     debug!("Decoding attribute {} in type {}", attr_type, std::any::type_name::<#name>());
                     match attr_type {

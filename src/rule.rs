@@ -1,12 +1,13 @@
 use std::fmt::Debug;
 
+use netlink_sys::AsyncSocket;
 use rustables_macros::nfnetlink_struct;
 
 use crate::chain::Chain;
 use crate::error::{BuilderError, QueryError};
 use crate::expr::{ExpressionList, RawExpression};
 use crate::nlmsg::NfNetlinkObject;
-use crate::query::list_objects_with_data;
+use crate::query::{list_objects_with_data, list_objects_with_data_async};
 use crate::sys::{
     NFTA_RULE_CHAIN, NFTA_RULE_EXPRESSIONS, NFTA_RULE_HANDLE, NFTA_RULE_ID, NFTA_RULE_POSITION,
     NFTA_RULE_TABLE, NFTA_RULE_USERDATA, NFT_MSG_DELRULE, NFT_MSG_NEWRULE, NLM_F_APPEND,
@@ -118,5 +119,24 @@ pub fn list_rules_for_chain(chain: &Chain) -> Result<Vec<Rule>, QueryError> {
         Some(&Rule::new(chain)?),
         &mut result,
     )?;
+    Ok(result)
+}
+
+pub async fn list_rules_for_chain_async<S: AsyncSocket>(
+    chain: &Chain,
+    S: &mut S,
+) -> anyhow::Result<Vec<Rule>> {
+    let mut result = Vec::new();
+    list_objects_with_data_async(
+        libc::NFT_MSG_GETRULE as u16,
+        &|rule: Rule, rules: &mut Vec<Rule>| {
+            rules.push(rule);
+            Ok(())
+        },
+        // only retrieve rules from the currently targetted chain
+        Some(&Rule::new(chain)?),
+        &mut result,
+        S,
+    ).await?;
     Ok(result)
 }

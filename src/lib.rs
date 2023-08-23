@@ -56,11 +56,11 @@ pub use batch::{default_batch_page_size, Batch};
 pub mod data_type;
 
 mod table;
-pub use table::list_tables;
+pub use table::{list_tables, list_tables_async};
 pub use table::Table;
 
 mod chain;
-pub use chain::list_chains_for_table;
+pub use chain::{list_chains_for_table, list_chains_for_table_async};
 pub use chain::{Chain, ChainPolicy, ChainPriority, ChainType, Hook, HookClass};
 
 pub mod error;
@@ -72,7 +72,7 @@ pub(crate) mod parser;
 pub(crate) mod parser_impls;
 
 mod rule;
-pub use rule::list_rules_for_chain;
+pub use rule::{list_rules_for_chain, list_rules_for_chain_async};
 pub use rule::Rule;
 
 pub mod expr;
@@ -86,6 +86,7 @@ pub use set::Set;
 pub mod sys;
 
 pub mod util;
+
 
 #[cfg(test)]
 mod tests;

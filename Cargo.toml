@@ -11,8 +11,6 @@ categories = ["network-programming", "os::unix-apis", "api-bindings"]
 resolver = "2"
 edition = "2021"
 
-[features]
-
 [dependencies]
 bitflags = "1.0"
 thiserror = "1.0"
@@ -21,10 +19,13 @@ libc = "0.2.43"
 nix = "0.23"
 ipnetwork = { version = "0.20", default-features = false }
 rustables-macros = { path = "macros", version = "0.1.1-alpha1" }
+netlink-sys = { path = "../netlink-sys" }
+bytes = "1.4.0"
+anyhow = "1.0.75"
 
 [dev-dependencies]
 env_logger = "0.9"
 
 [build-dependencies]
-bindgen = "0.53.1"
+bindgen = "0.60.1"
 regex = "1.5.4"
