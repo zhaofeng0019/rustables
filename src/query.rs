@@ -1,8 +1,4 @@
-use std::{
-    os::{unix::prelude::RawFd},
-};
-
-
+use std::os::unix::prelude::RawFd;
 
 use netlink_sys::{AsyncSocket, AsyncSocketExt};
 use nix::sys::socket::{self, AddressFamily, MsgFlags, SockFlag, SockProtocol, SockType};
@@ -97,7 +93,7 @@ pub(crate) fn recv_and_process<'a, T>(
 pub(crate) async fn recv_and_process_async<'a, T, S: AsyncSocket>(
     sock: &mut S,
     max_seq: Option<u32>,
-    cb: Option<&dyn Fn(&[u8], &mut T) -> Result<(), QueryError>>,
+    cb: Option<&(dyn (Fn(&[u8], &mut T) -> Result<(), QueryError>) + Send + Sync)>,
     working_data: &'a mut T,
 ) -> anyhow::Result<()> {
     let mut msg_buffer = vec![0; 2 * nft_nlmsg_maxsize() as usize];
@@ -264,7 +260,7 @@ where
 
 pub async fn list_objects_with_data_async<'a, Object, Accumulator, S: AsyncSocket>(
     data_type: u16,
-    cb: &dyn Fn(Object, &mut Accumulator) -> Result<(), QueryError>,
+    cb: &(dyn (Fn(Object, &mut Accumulator) -> Result<(), QueryError>) + Send + Sync),
     filter: Option<&Object>,
     working_data: &'a mut Accumulator,
     sock: &mut S,

@@ -97,6 +97,7 @@ impl Batch {
         *self.buf
     }
 
+    #[deprecated]
     pub fn send(self) -> Result<(), QueryError> {
         if !self.non_empty {
             // if empty, the socket will receive nothing and block forever
