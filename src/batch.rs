@@ -1,14 +1,12 @@
-use libc;
+use libc::{self, c_int};
 
 use thiserror::Error;
 
-
-
-use netlink_sys::{AsyncSocket, AsyncSocketExt};
+use netlink_sys::{AsyncSocket, AsyncSocketExt, Socket};
 
 use crate::error::QueryError;
 use crate::nlmsg::{NfNetlinkObject, NfNetlinkWriter};
-use crate::query::{recv_and_process_async};
+use crate::query::recv_and_process_async;
 use crate::sys::NFNL_SUBSYS_NFTABLES;
 use crate::{MsgType, ProtocolFamily};
 
@@ -97,8 +95,7 @@ impl Batch {
         *self.buf
     }
 
-    #[deprecated]
-    pub fn send(self) -> Result<(), QueryError> {
+    pub fn send(self, sock: &mut Socket) -> anyhow::Result<()> {
         if !self.non_empty {
             // if empty, the socket will receive nothing and block forever
             // observed on my machine
@@ -107,32 +104,18 @@ impl Batch {
 
         use crate::query::{recv_and_process, socket_close_wrapper};
 
-        let sock = socket::socket(
-            AddressFamily::Netlink,
-            SockType::Datagram,
-            SockFlag::empty(),
-            SockProtocol::NetlinkNetFilter,
-        )
-        .map_err(QueryError::NetlinkOpenError)?;
-
         let max_seq = self.seq - 1;
 
         let addr = SockAddr::Netlink(NetlinkAddr::new(0, 0));
-        // while this bind() is not strictly necessary, strace have trouble decoding the messages
-        // if we don't
-        socket::bind(sock, &addr).expect("bind");
 
         let to_send = self.finalize();
         log::trace!("to send {}", to_send.len());
         let mut sent = 0;
         while sent != to_send.len() {
-            sent += socket::send(sock, &to_send[sent..], MsgFlags::empty())
-                .map_err(QueryError::NetlinkSendError)?;
+            sent += sock.send(&to_send[sent..], MsgFlags::empty().bits())?;
         }
 
-        Ok(socket_close_wrapper(sock, move |sock| {
-            recv_and_process(sock, Some(max_seq), None, &mut ())
-        })?)
+        Ok(recv_and_process(sock, Some(max_seq), None, &mut ())?)
     }
 
     pub async fn send_async<S: AsyncSocket>(self, sock: &mut S) -> anyhow::Result<()> {

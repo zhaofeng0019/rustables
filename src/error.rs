@@ -136,15 +136,6 @@ pub enum BuilderError {
 
 #[derive(thiserror::Error, Debug)]
 pub enum QueryError {
-    #[error("Unable to open netlink socket to netfilter")]
-    NetlinkOpenError(#[source] nix::Error),
-
-    #[error("Unable to send netlink command to netfilter")]
-    NetlinkSendError(#[source] nix::Error),
-
-    #[error("Error while reading from netlink socket")]
-    NetlinkRecvError(#[source] nix::Error),
-
     #[error("Error while processing an incoming netlink message")]
     ProcessNetlinkError(#[from] DecodeError),
 

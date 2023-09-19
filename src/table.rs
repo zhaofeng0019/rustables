@@ -1,14 +1,13 @@
 use std::fmt::Debug;
 
-use netlink_sys::AsyncSocket;
+use netlink_sys::{AsyncSocket, Socket};
 use rustables_macros::nfnetlink_struct;
 
 use crate::error::QueryError;
 use crate::nlmsg::NfNetlinkObject;
 use crate::query::list_objects_with_data_async;
 use crate::sys::{
-    NFTA_TABLE_FLAGS, NFTA_TABLE_NAME, NFT_MSG_DELTABLE, NFT_MSG_GETTABLE,
-    NFT_MSG_NEWTABLE,
+    NFTA_TABLE_FLAGS, NFTA_TABLE_NAME, NFT_MSG_DELTABLE, NFT_MSG_GETTABLE, NFT_MSG_NEWTABLE,
 };
 use crate::util::Essence;
 use crate::{Batch, ProtocolFamily};
@@ -58,8 +57,9 @@ impl NfNetlinkObject for Table {
     }
 }
 
-pub fn list_tables() -> Result<Vec<Table>, QueryError> {
+pub fn list_tables(mut s: &mut Socket) -> anyhow::Result<Vec<Table>> {
     let mut result = Vec::new();
+
     crate::query::list_objects_with_data(
         NFT_MSG_GETTABLE as u16,
         &|table: Table, tables: &mut Vec<Table>| {
@@ -68,13 +68,12 @@ pub fn list_tables() -> Result<Vec<Table>, QueryError> {
         },
         None,
         &mut result,
+        s,
     )?;
     Ok(result)
 }
 
-pub async fn list_tables_async<S: AsyncSocket>(
-    S: &mut S,
-) -> anyhow::Result<Vec<Table>> {
+pub async fn list_tables_async<S: AsyncSocket>(s: &mut S) -> anyhow::Result<Vec<Table>> {
     let mut result = Vec::new();
     list_objects_with_data_async(
         NFT_MSG_GETTABLE as u16,
@@ -84,7 +83,8 @@ pub async fn list_tables_async<S: AsyncSocket>(
         },
         None,
         &mut result,
-        S,
-    ).await?;
+        s,
+    )
+    .await?;
     Ok(result)
 }

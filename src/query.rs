@@ -1,6 +1,7 @@
 use std::os::unix::prelude::RawFd;
 
-use netlink_sys::{AsyncSocket, AsyncSocketExt};
+use libc::c_int;
+use netlink_sys::{AsyncSocket, AsyncSocketExt, Socket};
 use nix::sys::socket::{self, AddressFamily, MsgFlags, SockFlag, SockProtocol, SockType};
 
 use crate::{
@@ -15,25 +16,25 @@ use crate::{
 };
 
 pub(crate) fn recv_and_process<'a, T>(
-    sock: RawFd,
+    sock: &mut Socket,
     max_seq: Option<u32>,
     cb: Option<&dyn Fn(&[u8], &mut T) -> Result<(), QueryError>>,
     working_data: &'a mut T,
-) -> Result<(), QueryError> {
+) -> anyhow::Result<()> {
     let mut msg_buffer = vec![0; 2 * nft_nlmsg_maxsize() as usize];
     let mut buf_start = 0;
     let mut end_pos = 0;
     debug!("recv_and_process");
     loop {
         debug!("recv_and_process nb_recv");
-        let nb_recv = socket::recv(sock, &mut msg_buffer[buf_start..], MsgFlags::empty())
-            .map_err(QueryError::NetlinkRecvError)?;
+
+        let nb_recv = sock.recv(&mut msg_buffer[buf_start..], MsgFlags::empty().bits())?;
         if nb_recv <= 0 {
             return Ok(());
         }
         end_pos += nb_recv;
         loop {
-            let buf = &msg_buffer.as_slice()[buf_start..end_pos];
+            let buf = &msg_buffer[buf_start..end_pos];
             // exit the loop and try to receive further messages when we consumed all the buffer
             if buf.len() == 0 {
                 break;
@@ -50,7 +51,8 @@ pub(crate) fn recv_and_process<'a, T>(
                 }
                 NlMsg::Error(e) => {
                     if e.error != 0 {
-                        return Err(QueryError::NetlinkError(e));
+                        // Ex. Do you have enough perms
+                        return Err(QueryError::NetlinkError(e).into());
                     }
                 }
                 NlMsg::Noop => {}
@@ -64,7 +66,7 @@ pub(crate) fn recv_and_process<'a, T>(
             // we cannot know when a sequence of messages will end if the messages do not end
             // with an NlMsg::Done marker if a maximum sequence number wasn't specified
             if max_seq.is_none() && nlmsghdr.nlmsg_flags & NLM_F_MULTI as u16 == 0 {
-                return Err(QueryError::UndecidableMessageTermination);
+                return Err(QueryError::UndecidableMessageTermination.into());
             }
 
             // retrieve the next message
@@ -212,23 +214,12 @@ pub fn list_objects_with_data<'a, Object, Accumulator>(
     cb: &dyn Fn(Object, &mut Accumulator) -> Result<(), QueryError>,
     filter: Option<&Object>,
     working_data: &'a mut Accumulator,
-) -> Result<(), QueryError>
+    sock: &mut Socket,
+) -> anyhow::Result<()>
 where
     Object: NfNetlinkObject + NfNetlinkAttribute,
 {
     debug!("Listing objects of kind {}", data_type);
-    let sock = socket::socket(
-        AddressFamily::Netlink,
-        SockType::Datagram,
-        SockFlag::empty(),
-        SockProtocol::NetlinkNetFilter,
-    )
-    .map_err(QueryError::NetlinkOpenError)?;
-
-    // let seq = std::time::SystemTime::now()
-    //     .duration_since(UNIX_EPOCH)
-    //     .unwrap()
-    //     .as_secs() as u32;
 
     let seq = 0;
     let chains_buf = get_list_of_objects(
@@ -242,20 +233,17 @@ where
             // this probably won't get you anything. usually programming error
         },
     )?;
-    socket::send(sock, &chains_buf, MsgFlags::empty()).map_err(QueryError::NetlinkSendError)?;
+    sock.send(&chains_buf, MsgFlags::empty().bits())?;
 
-    socket_close_wrapper(sock, move |sock| {
-        // the kernel should return NLM_F_MULTI objects
-        recv_and_process(
-            sock,
-            None,
-            Some(&|buf: &[u8], working_data: &mut Accumulator| {
-                debug!("Calling Object::deserialize()");
-                cb(Object::deserialize(buf)?.0, working_data)
-            }),
-            working_data,
-        )
-    })
+    recv_and_process(
+        sock,
+        None,
+        Some(&|buf: &[u8], working_data: &mut Accumulator| {
+            debug!("Calling Object::deserialize()");
+            cb(Object::deserialize(buf)?.0, working_data)
+        }),
+        working_data,
+    )
 }
 
 pub async fn list_objects_with_data_async<'a, Object, Accumulator, S: AsyncSocket>(

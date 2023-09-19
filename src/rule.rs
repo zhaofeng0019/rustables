@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use netlink_sys::AsyncSocket;
+use netlink_sys::{AsyncSocket, Socket};
 use rustables_macros::nfnetlink_struct;
 
 use crate::chain::Chain;
@@ -13,8 +13,8 @@ use crate::sys::{
     NFTA_RULE_TABLE, NFTA_RULE_USERDATA, NFT_MSG_DELRULE, NFT_MSG_NEWRULE, NLM_F_APPEND,
     NLM_F_CREATE,
 };
-use crate::{Batch, ProtocolFamily};
 use crate::util;
+use crate::{Batch, ProtocolFamily};
 
 /// A nftables firewall rule.
 #[derive(Clone, PartialEq, Eq, Default, Debug, Hash)]
@@ -77,8 +77,6 @@ impl Rule {
         batch.add(&self, crate::MsgType::Add);
         self
     }
-
-
 }
 
 impl util::Essence for Rule {
@@ -107,7 +105,7 @@ impl NfNetlinkObject for Rule {
     }
 }
 
-pub fn list_rules_for_chain(chain: &Chain) -> Result<Vec<Rule>, QueryError> {
+pub fn list_rules_for_chain(chain: &Chain, sock: &mut Socket) -> anyhow::Result<Vec<Rule>> {
     let mut result = Vec::new();
     list_objects_with_data(
         libc::NFT_MSG_GETRULE as u16,
@@ -118,6 +116,7 @@ pub fn list_rules_for_chain(chain: &Chain) -> Result<Vec<Rule>, QueryError> {
         // only retrieve rules from the currently targetted chain
         Some(&Rule::new(chain)?),
         &mut result,
+        sock,
     )?;
     Ok(result)
 }
@@ -137,6 +136,7 @@ pub async fn list_rules_for_chain_async<S: AsyncSocket>(
         Some(&Rule::new(chain)?),
         &mut result,
         S,
-    ).await?;
+    )
+    .await?;
     Ok(result)
 }

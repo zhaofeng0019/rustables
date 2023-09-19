@@ -27,5 +27,5 @@ anyhow = "1.0.75"
 env_logger = "0.9"
 
 [build-dependencies]
-bindgen = "0.60.1"
+bindgen = "0.68.1"
 regex = "1.5.4"
