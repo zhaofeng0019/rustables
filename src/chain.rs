@@ -208,6 +208,7 @@ pub fn list_chains_for_table(table: &Table, sock: &mut Socket) -> anyhow::Result
     Ok(result)
 }
 
+#[allow(non_snake_case)]
 pub async fn list_chains_for_table_async<S: AsyncSocket>(
     table: &Table,
     S: &mut S,

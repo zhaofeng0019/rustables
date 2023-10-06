@@ -1,4 +1,5 @@
 #![allow(rustdoc::broken_intra_doc_links)]
+#![allow(unused)]
 
 use std::fs::File;
 use std::io::Read;

@@ -121,6 +121,7 @@ pub fn list_rules_for_chain(chain: &Chain, sock: &mut Socket) -> anyhow::Result<
     Ok(result)
 }
 
+#[allow(non_snake_case)]
 pub async fn list_rules_for_chain_async<S: AsyncSocket>(
     chain: &Chain,
     S: &mut S,

@@ -42,6 +42,7 @@
 //!
 //! [`nftables`]: https://netfilter.org/projects/nftables/
 
+#![allow(unused)]
 #[macro_use]
 extern crate log;
 
