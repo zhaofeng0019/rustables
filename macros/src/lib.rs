@@ -350,7 +350,7 @@ pub fn nfnetlink_struct(attrs: TokenStream, item: TokenStream) -> TokenStream {
             let field_type = field.ty;
             let netlink_value = &field.netlink_type;
             quote!(
-                x if x == #netlink_value => {
+                x if x == #netlink_value as _ => {
                     debug!("Calling {}::deserialize()", std::any::type_name::<#field_type>());
                     let (val, remaining) = <#field_type>::deserialize(buf)?;
                     if remaining.len() != 0 {
@@ -397,7 +397,7 @@ pub fn nfnetlink_struct(attrs: TokenStream, item: TokenStream) -> TokenStream {
                 if let Some(val) = &self.#field_name {
                     debug!("writing attribute {} - {:?}", #field_str, val);
 
-                    crate::parser::write_attribute(#netlink_value, val, addr);
+                    crate::parser::write_attribute(#netlink_value as _, val, addr);
 
                     #[allow(unused)]
                     {
@@ -585,7 +585,7 @@ pub fn nfnetlink_enum(attrs: TokenStream, item: TokenStream) -> TokenStream {
     let attrs = ast.attrs;
     let original_variants = variants.into_iter().map(|x| {
         let mut inner = x.inner.clone();
-        let mut discriminant = inner.discriminant.as_mut().unwrap();
+        let discriminant = inner.discriminant.as_mut().unwrap();
         let cur_value = discriminant.1.clone();
         let cast_value = Expr::Cast(ExprCast {
             attrs: vec![],

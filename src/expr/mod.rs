@@ -126,7 +126,7 @@ macro_rules! create_expr_variant {
             ) -> Result<(), $crate::error::DecodeError> {
                 debug!("Decoding attribute {} in an expression", attr_type);
                 match attr_type {
-                    x if x == sys::NFTA_EXPR_NAME => {
+                    x if x == sys::NFTA_EXPR_NAME as _ => {
                         debug!("Calling {}::deserialize()", std::any::type_name::<String>());
                         let (val, remaining) = String::deserialize(buf)?;
                         if remaining.len() != 0 {
@@ -135,7 +135,7 @@ macro_rules! create_expr_variant {
                         self.name = Some(val);
                         Ok(())
                     },
-                    x if x == sys::NFTA_EXPR_DATA => {
+                    x if x == sys::NFTA_EXPR_DATA as _ => {
                         // we can assume we have already the name parsed, as that's how we identify the
                         // type of expression
                         let name = self.name.as_ref()

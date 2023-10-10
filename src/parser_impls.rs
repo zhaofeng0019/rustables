@@ -175,7 +175,7 @@ where
 
     fn write_payload(&self, mut addr: &mut [u8]) {
         for item in &self.objs {
-            write_attribute(NFTA_LIST_ELEM, item, addr);
+            write_attribute(NFTA_LIST_ELEM as _, item, addr);
             let offset = pad_netlink_object::<nlattr>() + item.get_size();
             addr = &mut addr[offset..];
         }
@@ -195,7 +195,7 @@ where
             // ignore the byteorder and nested attributes
             let nla_type = nlattr.nla_type & NLA_TYPE_MASK as u16;
 
-            if nla_type != NFTA_LIST_ELEM {
+            if nla_type != NFTA_LIST_ELEM as _ {
                 return Err(DecodeError::UnsupportedAttributeType(nla_type));
             }
 
