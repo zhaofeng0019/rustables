@@ -54,6 +54,9 @@ pub use self::register::Register;
 mod verdict;
 pub use self::verdict::*;
 
+mod range;
+pub use self::range::*;
+
 pub trait Expression {
     fn get_name() -> &'static str;
 }
@@ -180,7 +183,8 @@ create_expr_variant!(
     [Meta, Meta],
     [Nat, Nat],
     [Payload, Payload],
-    [Reject, Reject]
+    [Reject, Reject],
+    [Range, Range]
 );
 
 pub type ExpressionList = NfNetlinkList<RawExpression>;
