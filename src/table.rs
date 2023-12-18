@@ -30,7 +30,7 @@ impl Table {
     pub fn new(family: ProtocolFamily) -> Table {
         let mut res = Self::default();
         res.family = family;
-        res
+        res.with_flags(0u32)
     }
 
     /// Appends this rule to `batch`

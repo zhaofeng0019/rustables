@@ -90,11 +90,12 @@ impl NfNetlinkDeserializable for u64 {
 
 impl NfNetlinkAttribute for String {
     fn get_size(&self) -> usize {
-        self.len()
+        self.len() + 1
     }
 
     fn write_payload(&self, addr: &mut [u8]) {
         addr[0..self.len()].copy_from_slice(&self.as_bytes());
+        addr[self.len()] = 0;
     }
 }
 
